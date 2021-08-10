@@ -1,0 +1,7 @@
+opencv-python
+onnxruntime
+numpy
+Pillow
+matplotlib
+paho-mqtt
+mxnet
