@@ -1,0 +1,9 @@
+opencv-python-headless
+onnxruntime
+numpy
+Pillow
+matplotlib
+paho-mqtt
+mxnet
+onnx
+protobuf
