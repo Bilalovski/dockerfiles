@@ -34,3 +34,8 @@ configuring the containers will require multiple steps. If the model that is use
 Depending on the amount of outputs given by the onnx model, a new onnx inference function might need to be created. Currently the onnx inference module supports onnx models with 3 or 4 outputs. If the new model has a different amount of outputs, a new onnx inference function will need to be added.
 
 Lastly, if the available postprocessing functions are not compatible with the desired model, then a new postprocessing function will need to be added, once the postprocessing is finished, the data should be sent using dust.
+
+
+# Demo
+
+To test the containers, all that is needed is building the docker containers in each folder (docker build -t "tag_name" . . Once all of them are build and running, you can publish an rgb image using dust, do make sure the channel names are correct (see configuration.json for channel names). You can then receive the output of the postprocessor using another dust script.
