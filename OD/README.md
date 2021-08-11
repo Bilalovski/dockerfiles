@@ -25,3 +25,12 @@ Finally we can postprocess the data according to the choice variable we got. The
 
 once all the classes above a score of 0.7 have been detected, they are put in an array and sent using dust, the channel is pub_postProcess_OD.
 
+
+# Configuration
+
+
+configuring the containers will require multiple steps. If the model that is used cannot have inputs that use a preprocessing function that is already available, then the preprocessing function needs to be added under a new choice, which in our case, was 1 for rcnn and 2 for mobinet, the next one could be 3 for a new model. The preprocessed image will then have to be published using mqtt. Currently the channel used is preprocess_out.
+
+Depending on the amount of outputs given by the onnx model, a new onnx inference function might need to be created. Currently the onnx inference module supports onnx models with 3 or 4 outputs. If the new model has a different amount of outputs, a new onnx inference function will need to be added.
+
+Lastly, if the available postprocessing functions are not compatible with the desired model, then a new postprocessing function will need to be added, once the postprocessing is finished, the data should be sent using dust.
