@@ -7,35 +7,17 @@ import paho.mqtt.client as paho
 from mxnet.contrib.onnx.onnx2mx.import_model import import_model
 from collections import namedtuple
 
-sqz=False
+global datalist
+datalist = []
+global data
 
 
-def on_connect(mqtt_client, obj, flags, rc):
-    if rc==0:
-        client.subscribe("cl_preprocess_out", qos=0)
-        print("connected")
-    else:
-        print("connection refused")
-
-def on_message(clientName, userdata, message):
-    print("message received")
-    global data
-    data = json.loads(message.payload.decode('utf-8'))
+def begin():
+    data = datalist.pop()
     choice = data['choice']
-    if choice ==1:
-        global sqz
-        sqz=True
-broker = "broker.mqttdashboard.com"
-client = paho.Client("cl_inference_node")
-client.on_connect = on_connect
-client.on_message = on_message
-client.connect(broker)
-client.loop_start()
-
-while 1:
-    if sqz:
-        start = time.time()
-        sym, arg_params, aux_params = import_model("squeezenet1.1-7.onnx")
+    if choice == 1:
+        model_path = data['onnx_path']
+        sym, arg_params, aux_params = import_model(model_path)
         Batch = namedtuple('Batch', ['data'])
         if len(mx.test_utils.list_gpus()) == 0:
             ctx = mx.cpu()
@@ -53,7 +35,33 @@ while 1:
         # print the top-5 inferences class
         scores = np.squeeze(scores)
 
-        data = {'choice': 1, 'scores': scores.tolist()}
+        data = {'choice': 1, 'scores': scores.tolist(), 'label_path': data['label_path']}
         payload = json.dumps(data)
         client.publish("cl_inference_out", payload)
-        sqz=False
+
+
+def on_connect(mqtt_client, obj, flags, rc):
+    if rc == 0:
+        client.subscribe("cl_preprocess_out", qos=0)
+        print("connected")
+    else:
+        print("connection refused")
+
+
+def on_message(clientName, userdata, message):
+    print("message received")
+    global data
+    data = json.loads(message.payload.decode('utf-8'))
+    datalist.append(data)
+
+
+broker = "broker.mqttdashboard.com"
+client = paho.Client("cl_inference_node")
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect(broker)
+client.loop_start()
+
+while 1:
+    if not len(datalist) == 0:
+        begin()
