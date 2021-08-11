@@ -38,4 +38,4 @@ Lastly, if the available postprocessing functions are not compatible with the de
 
 # Demo
 
-To test the containers, all that is needed is building the docker containers in each folder (docker build -t "tag_name" . . Once all of them are build and running, you can publish an rgb image using dust, do make sure the channel names are correct (see configuration.json for channel names). You can then receive the output of the postprocessor using another dust script.
+To test the containers, all that is needed is building the docker containers in each folder (docker build -t "tag_name" .). Once all of them are build and running, you can publish an rgb image using dust, do make sure the channel names are correct (see configuration.json for channel names). You can then receive the output of the postprocessor using another dust script.
