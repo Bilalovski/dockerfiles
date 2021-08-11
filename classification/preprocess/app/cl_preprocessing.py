@@ -8,11 +8,22 @@ from pydust import core
 from mxnet.gluon.data.vision import transforms
 import pickle
 from PIL import Image
+import sys
 published=False
 choice = 1
 
 def receive(arg):
     img = pickle.loads(arg)
+    param = sys.argv
+    choice = 1
+    if len(param) > 2:
+        choice = param [1]
+        model_path = param[2]
+        label_paths = param[3]
+    if len(param) == 1:
+        choice = 1
+    print(choice)
+
     if choice == 1:
         img = mx.ndarray.array(img)
         img = preprocess(img)

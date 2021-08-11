@@ -5,7 +5,7 @@ import paho.mqtt.client as paho
 from PIL import Image
 import pickle
 import time
-
+import sys
 from pydust import core
 
 published=False
@@ -52,6 +52,16 @@ def preprocess(image):
 
 def receive(arg):
     image= pickle.loads(arg)
+    param = sys.argv
+    choice = 1
+    if len(param) > 2:
+        choice = param [1]
+        model_path = param[2]
+        label_paths = param[3]
+    if len(param) == 1:
+        choice = 1
+    print(choice)
+
     if choice == 1:
         img = preprocess(image)
         data = {'choice': choice, 'data': img.tolist()}
