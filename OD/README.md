@@ -4,6 +4,7 @@ This folder contains the nescessary files for object detection using onnx models
 ## Preprocessing ##
 the preprocessing modules reads in data published by dust, this data needs to be an image that has been converted to bytearrays. For demo purposes, we used pickle to convert an image to bytes.
 Multiple parameters can be passed along, but they are not required: 
+
 *the choice of the preprocessing function to be used: this is an int, 1 will preform the preprocessing steps for the rcnn model, while 2 will preprocess according to required mobinet input.  
 *the model path to be used in the actual inference
 *the path for the labels to be used in the postprocessing module*
