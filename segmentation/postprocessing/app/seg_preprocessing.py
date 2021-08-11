@@ -5,11 +5,12 @@ import paho.mqtt.client as paho
 from PIL import Image
 import pickle
 import time
-
+import sys
 from pydust import core
 
 published=False
-
+global img_list
+img_list= []
 def on_connect(mqtt_client, obj, flags, rc):
     if rc==0:
         print("connected")
@@ -21,7 +22,27 @@ def on_publish(client, userdata, mid):
     global published
     published=True
 
+def begin():
+    image = img_list.pop()
+    param = sys.argv
+    choice = 1
+    if len(param) > 2:
+        choice = param[1]
+        model_path = param[2]
+        label_path = param[3]
+    if len(param) == 1:
+        choice = 1
 
+    if choice == 1:
+        model_path = 'MaskRCNN-10.onnx'
+        label_path = 'labels.txt'
+        img = preprocess(image)
+        data = {'choice': choice, 'data': img.tolist(), 'onnx_path': model_path, 'label_path': label_path}
+        payload = json.dumps(data)
+        client.publish("seg_preprocess_out", payload, qos=0)
+
+    while not published:
+        pass
 def preprocess(image):
     # Resize
     ratio = 800.0 / min(image.size[0], image.size[1])
@@ -52,17 +73,10 @@ def preprocess(image):
 
 def receive(arg):
     image= pickle.loads(arg)
-    if choice == 1:
-        img = preprocess(image)
-        data = {'choice': choice, 'data': img.tolist()}
-        payload = json.dumps(data)
-        client.publish("seg_preprocess_out", payload, qos=0)
-
-    while not published:
-        pass
+    img_list.append(image)
 
 
-broker = "127.0.0.1"
+broker = "broker.mqttdashboard.com"
 client = paho.Client("seg_preprocessor")
 client.on_connect=on_connect
 client.on_publish=on_publish
@@ -86,4 +100,5 @@ dust.register_listener("seg_image", receive)
 # dust.register_listener("subscribe-mqtt", lambda payload: print("Received payload with %d bytes" % len(payload)))
 
 while True:
-    time.sleep(1)
+    if not len(img_list)==0:
+        begin()

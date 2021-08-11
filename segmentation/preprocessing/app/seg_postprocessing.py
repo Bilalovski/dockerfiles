@@ -8,6 +8,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageColor
 from pydust import core
 
+global datalist
+datalist=[]
 disp=False
 classes = [line.rstrip('\n') for line in open('labels.txt')]
 
@@ -85,20 +87,21 @@ def display_objdetect_image(image, boxes, labels, scores, masks, score_threshold
     #plt.show()
 
 
-
-def on_message(clientname, userdata, message):
-    time.sleep(1)
-    data = json.loads(message.payload.decode('utf-8'))
-    global choice
+def begin():
+    data = datalist.pop()
     choice = data['choice']
     global boxes_seg, labels_seg, scores_seg, masks_seg, disp
     if choice == 1:
         boxes_seg = np.array(data['data1']).astype('float32')
-        labels_seg= np.array(data['data2']).astype('int64')
-        scores_seg= np.array(data['data3']).astype('float32')
-        masks_seg= np.array(data['data4']).astype('float32')
+        labels_seg = np.array(data['data2']).astype('int64')
+        scores_seg = np.array(data['data3']).astype('float32')
+        masks_seg = np.array(data['data4']).astype('float32')
         print(masks_seg.shape)
-        disp=True
+        display_objdetect_image(Image.open("demo.jpg"), boxes_seg, labels_seg, scores_seg, masks_seg)
+
+def on_message(clientname, userdata, message):
+    data = json.loads(message.payload.decode('utf-8'))
+    datalist.append(data)
 
 
 def on_connect(mqtt_client, obj, flags, rc):
@@ -109,14 +112,13 @@ def on_connect(mqtt_client, obj, flags, rc):
         print("connection refused")
 
 
-broker = "127.0.0.1"
+broker = "broker.mqttdashboard.com"
 client = paho.Client("seg_postprocessor")
 client.on_message=on_message
 client.on_connect=on_connect
 client.connect(broker)
 client.loop_start()
 while 1:
-    if disp:
-        if choice == 1:
-            display_objdetect_image(Image.open("demo.jpg"), boxes_seg, labels_seg, scores_seg, masks_seg)
-            disp=False
+    if not len(datalist)==0:
+        begin()
+
